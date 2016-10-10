@@ -7,7 +7,7 @@
         android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="45.0dip"
-        android:background="#ffcd2626"
+        android:background="#ffa04649"
         android:gravity="center_vertical"
         >
 
@@ -54,7 +54,7 @@
             android:layout_toLeftOf="@id/title_share"
             android:src="@drawable/base_action_bar_action_city"/>
     </RelativeLayout>
-    
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -218,7 +218,7 @@
                     android:layout_marginLeft="5dip"
                     android:layout_toRightOf="@id/weather_img"
                     android:singleLine="true"
-                    android:text="-2C~7C"
+                    android:text="-2℃~7℃"
                     android:textColor="@android:color/white"
                     android:textSize="30.0sp"/>
                 <!--天气状况-->
@@ -253,7 +253,7 @@
                     android:layout_below="@id/wind"
                     android:layout_toRightOf="@id/weather_img"
                     android:layout_marginLeft="5dip"
-                    android:text="4C"
+                    android:text="4℃"
                     android:textColor="@android:color/white"
                     android:textSize="30.0sp"/>
             </RelativeLayout>
