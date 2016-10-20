@@ -1,6 +1,7 @@
 package cn.edu.pku.zhanghuiru.miniweather;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,7 +33,7 @@ import cn.edu.pku.zhanghuiru.util.NetUtil;
  */
 public class MainActivity extends Activity implements View.OnClickListener {
     private static final int UPDATE_TODAY_WEATHER=1;
-    private ImageView mUpdateBtn;
+    private ImageView mUpdateBtn,mCitySelect;
 
     private TextView cityTv,timeTv,humidityTv,pmQualityTv,pmDataTv,weekTv,temperatureTv,
             climateTv,windTv,city_name_Tv,degreeTv;
@@ -60,6 +61,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         mUpdateBtn=(ImageView)findViewById(R.id.title_update_btn);
         mUpdateBtn.setOnClickListener(this);
+
+        mCitySelect=(ImageView)findViewById(R.id.title_city_manager);
+        mCitySelect.setOnClickListener(this);
 
         if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
             Log.d("myWeather","网络OK");
@@ -123,6 +127,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View view){
+        if(view.getId()==R.id.title_city_manager){
+            Intent intent=new Intent(this,SelectCity.class);
+//            startActivity(intent);
+            startActivityForResult(intent,1);
+        }
+
         if(view.getId()==R.id.title_update_btn){
             SharedPreferences sharedPreferences=getSharedPreferences("config",MODE_PRIVATE);
             String cityCode=sharedPreferences.getString("main_city_code","101010100");
@@ -166,6 +176,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
         city_name_Tv.setText("N/A");
 
         degreeTv.setText("N/A");
+    }
+
+    //接收从另一个布局返回的数据
+    @Override
+    protected void onActivityResult(int requestCode,int resultCode,Intent i){
+        if(requestCode==1&&resultCode==RESULT_OK){
+            String newCityCode=i.getStringExtra("cityCode");
+            Log.d("myWeather","选择的城市代码为"+newCityCode);
+
+            if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
+                Log.d("myWeather","网络OK");
+                queryWeatherCode(newCityCode);
+            }else{
+                Log.d("myWeather","网络挂了");
+                Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+            }
+        }
+
     }
 
 
@@ -445,8 +473,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case "中雨":
                 weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
                 break;
-
-
         }
         Toast.makeText(MainActivity.this, "更新成功", Toast.LENGTH_LONG).show();
     }
