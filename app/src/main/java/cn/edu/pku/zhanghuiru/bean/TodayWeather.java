@@ -1,9 +1,12 @@
 package cn.edu.pku.zhanghuiru.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by Nichole on 2016/10/11.
  */
-public class TodayWeather {
+public class TodayWeather implements Serializable {
+    private static final long serialVersionUID=1L;
     private String city;
     private String updatetime;
     private String shidu;

@@ -40,7 +40,18 @@
             android:layout_height="45.0dip"
             android:layout_alignParentRight="true"
             android:layout_gravity="center"
-            android:src="@drawable/title_update"/>
+            android:src="@drawable/title_update"
+            android:visibility="visible"/>
+
+        <ProgressBar
+            android:id="@+id/title_update_progress"
+            android:layout_width="45.0dip"
+            android:layout_height="45.0dip"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/title_share"
+            style="@style/title_update_progress_style"
+            android:visibility="invisible"/>
+
         <ImageView
             android:id="@+id/title_share"
             android:layout_width="45.0dip"
@@ -262,6 +273,21 @@
         </RelativeLayout>
 
         <!--七日天气信息-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/weather_today"
+            android:id="@+id/sevenDayWeather_content">
+
+            <!--
+            <android.support.v4.view.ViewPager
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/sevenDayWeather">
+            </android.support.v4.view.ViewPager>
+            -->
+
+        </RelativeLayout>
 
         <!--广告等信息-->
 

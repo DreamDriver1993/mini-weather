@@ -1,15 +1,21 @@
 package cn.edu.pku.zhanghuiru.miniweather;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,15 +24,23 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.edu.pku.zhanghuiru.bean.TodayWeather;
 import cn.edu.pku.zhanghuiru.util.NetUtil;
+import cn.edu.pku.zhanghuiru.util.ViewPagerAdapter;
 
 /**
  * Created by Nichole on 2016/9/20.
@@ -38,6 +52,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView cityTv,timeTv,humidityTv,pmQualityTv,pmDataTv,weekTv,temperatureTv,
             climateTv,windTv,city_name_Tv,degreeTv;
     private ImageView weatherImg,pmImg;
+    private ProgressBar updateprogressbar;
+
+    private ViewPager viewPager;
+    private List<View> views;
+    private ViewPagerAdapter viewPagerAdapter;
+
+    private RelativeLayout pagerLayout;
 
     private Handler mhandler=new Handler(){
         public void handleMessage(android.os.Message msg){
@@ -52,6 +73,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     };
 
+    //进行序列化所需要的
+    private TodayWeather weather=null;
+    private long startTime=01,endTime=01;
 
 
     @Override
@@ -65,6 +89,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mCitySelect=(ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
 
+        updateprogressbar=(ProgressBar)findViewById(R.id.title_update_progress);
+
         if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
             Log.d("myWeather","网络OK");
             Toast.makeText(MainActivity.this, "网络OK！", Toast.LENGTH_LONG).show();
@@ -72,9 +98,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Log.d("myWeather","网络挂了");
             Toast.makeText(MainActivity.this, "网络挂了!", Toast.LENGTH_LONG).show();
         }
+
         initView();
+        initPagerView();
     }
 
+
+    public void initPagerView(){
+        pagerLayout=(RelativeLayout)findViewById(R.id.sevenDayWeather_content);
+        LayoutInflater layoutInflater=LayoutInflater.from(this);
+        views=new ArrayList<View>();
+        views.add(layoutInflater.inflate(R.layout.three_days_weather,null));
+        views.add(layoutInflater.inflate(R.layout.six_days_weather,null));
+        viewPagerAdapter=new ViewPagerAdapter(views,this);
+        /*viewPager=(ViewPager)findViewById(R.id.sevenDayWeather);*/
+        viewPager=new ViewPager(this);
+        viewPager.setAdapter(viewPagerAdapter);
+        //添加到父容器中
+        pagerLayout.addView(viewPager);
+    }
     /**
      *
      * @param cityCode
@@ -106,7 +148,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                     todayWeather=parseXML(responseStr);
                     if(todayWeather!=null){
+                        //对于没有pm信息的城市默认为0
+                        if(todayWeather.getPm25()==null){
+                            todayWeather.setPm25("0");
+                        }
                         Log.d("todayWeather",todayWeather.toString());
+
+                        //将weather信息保存到文件中
+                        saveObject(serialize(todayWeather));
+
                         Message msg=new Message();
                         msg.what=UPDATE_TODAY_WEATHER;
                         msg.obj=todayWeather;
@@ -134,15 +184,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         if(view.getId()==R.id.title_update_btn){
+
             SharedPreferences sharedPreferences=getSharedPreferences("config",MODE_PRIVATE);
             String cityCode=sharedPreferences.getString("main_city_code","101010100");
             Log.d("myWeather",cityCode);
 
             if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
                 Log.d("myWeather","网络OK");
+                mUpdateBtn.setVisibility(View.INVISIBLE);
+                updateprogressbar.setVisibility(View.VISIBLE);
                 queryWeatherCode(cityCode);
+                mUpdateBtn.setVisibility(View.VISIBLE);
+                updateprogressbar.setVisibility(View.INVISIBLE);
             }else{
                 Log.d("myWeather","网络挂了");
+                mUpdateBtn.setVisibility(View.INVISIBLE);
+                updateprogressbar.setVisibility(View.VISIBLE);
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
             }
         }
@@ -164,18 +221,39 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //自己添加的温度部分
         degreeTv=(TextView)findViewById(R.id.degree);
 
-        cityTv.setText("N/A");
-        timeTv.setText("N/A");
-        humidityTv.setText("N/A");
-        pmQualityTv.setText("N/A");
-        pmDataTv.setText("N/A");
-        weekTv.setText("N/A");
-        temperatureTv.setText("N/A");
-        climateTv.setText("N/A");
-        windTv.setText("N/A");
-        city_name_Tv.setText("N/A");
+        //从文件中读取天气信息
+        try{
+            weather=(TodayWeather)deSerialize(getObject());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if(weather==null){
+            cityTv.setText("N/A");
+            timeTv.setText("N/A");
+            humidityTv.setText("N/A");
+            pmQualityTv.setText("N/A");
+            pmDataTv.setText("N/A");
+            weekTv.setText("N/A");
+            temperatureTv.setText("N/A");
+            climateTv.setText("N/A");
+            windTv.setText("N/A");
+            city_name_Tv.setText("N/A");
+            degreeTv.setText("N/A");
+        }else{
+            city_name_Tv.setText(weather.getCity()+"天气");
+            cityTv.setText(weather.getCity());
+            timeTv.setText("今天"+weather.getUpdatetime()+"发布");
+            humidityTv.setText("湿度："+weather.getShidu());
+            pmQualityTv.setText(weather.getQuality());
+            pmDataTv.setText(weather.getPm25());
+            weekTv.setText(weather.getDate());
+            temperatureTv.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+            climateTv.setText(weather.getType());
+            windTv.setText(weather.getFengxiang()+weather.getFengli());
+            degreeTv.setText(weather.getWendu()+"℃");
+        }
 
-        degreeTv.setText("N/A");
+
     }
 
     //接收从另一个布局返回的数据
@@ -184,6 +262,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if(requestCode==1&&resultCode==RESULT_OK){
             String newCityCode=i.getStringExtra("cityCode");
             Log.d("myWeather","选择的城市代码为"+newCityCode);
+            //可以把城市代码和天气信息保存到本地文件中，下次打开之后直接显示
 
             if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
                 Log.d("myWeather","网络OK");
@@ -475,6 +554,47 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
         }
         Toast.makeText(MainActivity.this, "更新成功", Toast.LENGTH_LONG).show();
+    }
+
+    //对天气预报信息进行序列化，使用sharedPreference存储到文件中
+    private String serialize(TodayWeather todayWeather)throws IOException{
+        startTime=System.currentTimeMillis();
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(todayWeather);
+        String str=byteArrayOutputStream.toString("ISO-8859-1");
+        str=java.net.URLEncoder.encode(str,"UTF-8");
+        objectOutputStream.close();
+        byteArrayOutputStream.close();
+        Log.d("Serial TodayWeather","Serial Content:"+str);
+        endTime=System.currentTimeMillis();
+        Log.d("Serial TodayWeather","序列化时间为："+(endTime-startTime));
+        return str;
+    }
+
+    private TodayWeather deSerialize(String str)throws IOException,ClassNotFoundException{
+        startTime=System.currentTimeMillis();
+        String redStr=java.net.URLDecoder.decode(str,"UTF-8");
+        ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(redStr.getBytes("ISO-8859-1"));
+        ObjectInputStream objectInputStream=new ObjectInputStream(byteArrayInputStream);
+        TodayWeather todayWeather=(TodayWeather) objectInputStream.readObject();
+        objectInputStream.close();
+        byteArrayInputStream.close();
+        endTime=System.currentTimeMillis();
+        Log.d("Deserial TodayWeather","反序列化时间为:"+(endTime-startTime));
+        return todayWeather;
+    }
+
+    void saveObject(String  strObject){
+        SharedPreferences sp=getSharedPreferences("weatherinfo",0) ;
+        SharedPreferences.Editor editor=sp.edit();
+        editor.putString("todayWeather",strObject);
+        editor.commit();
+    }
+
+    String getObject(){
+        SharedPreferences sp=getSharedPreferences("weatherinfo",0);
+        return sp.getString("todayWeather",null);
     }
 
 }
