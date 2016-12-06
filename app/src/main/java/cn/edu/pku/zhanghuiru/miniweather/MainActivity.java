@@ -103,7 +103,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         initPagerView();
     }
 
-
+    //一周天气情况
     public void initPagerView(){
         pagerLayout=(RelativeLayout)findViewById(R.id.sevenDayWeather_content);
         LayoutInflater layoutInflater=LayoutInflater.from(this);
@@ -247,8 +247,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
             pmQualityTv.setText(weather.getQuality());
             pmDataTv.setText(weather.getPm25());
             weekTv.setText(weather.getDate());
-            temperatureTv.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
-            climateTv.setText(weather.getType());
+            if(weather.getHigh()!=null&&weather.getLow()!=null) {
+                temperatureTv.setText(weather.getHigh().substring(2) + "~" + weather.getLow().substring(2));
+            }climateTv.setText(weather.getType());
             windTv.setText(weather.getFengxiang()+weather.getFengli());
             degreeTv.setText(weather.getWendu()+"℃");
         }
@@ -463,7 +464,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         pmQualityTv.setText(todayWeather.getQuality());
         pmDataTv.setText(todayWeather.getPm25());
         weekTv.setText(todayWeather.getDate());
-        temperatureTv.setText(todayWeather.getHigh().substring(2)+"~"+todayWeather.getLow().substring(2));
+        if(todayWeather.getHigh()!=null&&todayWeather.getLow()!=null){
+            temperatureTv.setText(todayWeather.getHigh().substring(2)+"~"+todayWeather.getLow().substring(2));
+        }
         climateTv.setText(todayWeather.getType());
         windTv.setText(todayWeather.getFengxiang()+todayWeather.getFengli());
         degreeTv.setText(todayWeather.getWendu()+"℃");
