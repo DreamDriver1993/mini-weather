@@ -4,161 +4,168 @@
     android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp">
             <TextView
                 android:id="@+id/fourthDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_marginLeft="20dip"
+                android:layout_marginLeft="10dip"
                 android:singleLine="true"
                 android:text="星期四"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"/>
+                android:textSize="18sp"/>
             <ImageView
                 android:id="@+id/fourth_weather_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_below="@+id/fourthDay"
                 android:src="@drawable/biz_plugin_weather_duoyun"/>
             <TextView
-                android:id="@+id/fourth_temperatrue"
+                android:id="@+id/fourth_climate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/fourth_weather_img"
                 android:layout_marginLeft="5dip"
                 android:singleLine="true"
-                android:text="-2℃~7℃"
-                android:textColor="@android:color/white"
-                android:textSize="30.0sp"/>
-            <TextView
-                android:id="@+id/fourth_climate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/fourth_temperatrue"
-                android:layout_marginLeft="5dip"
-                android:singleLine="true"
                 android:text="多云转晴"
                 android:textColor="@android:color/white"
-                android:textSize="20.0sp"/>
-            <!--风力信息-->
+                android:textSize="18.0sp"/>
             <TextView
-                android:id="@+id/fourth_wind"
+                android:id="@+id/fourth_temperatrue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/fourth_climate"
                 android:layout_marginLeft="5dip"
                 android:singleLine="true"
+                android:text="-2℃~7℃"
+                android:textColor="@android:color/white"
+                android:textSize="18.0sp"/>
+
+            <!--风力信息-->
+            <TextView
+                android:id="@+id/fourth_wind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fourth_temperatrue"
+                android:layout_marginLeft="5dip"
+                android:singleLine="false"
                 android:text="微风"
                 android:textColor="@android:color/white"
-                android:textSize="20.0sp"/>
+                android:textSize="18.0sp"/>
 
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp">
             <TextView
                 android:id="@+id/fifthDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_marginLeft="20dip"
+                android:layout_marginLeft="10dip"
                 android:singleLine="true"
                 android:text="星期四"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"/>
+                android:textSize="18sp"/>
             <ImageView
                 android:id="@+id/fifth_weather_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_below="@+id/fifthDay"
                 android:src="@drawable/biz_plugin_weather_duoyun"/>
-            <TextView
-                android:id="@+id/fifth_temperatrue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/fifth_weather_img"
-                android:layout_marginLeft="5dip"
-                android:singleLine="true"
-                android:text="-2℃~7℃"
-                android:textColor="@android:color/white"
-                android:textSize="30.0sp"/>
             <TextView
                 android:id="@+id/fifth_climate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/fifth_temperatrue"
-                android:layout_marginLeft="5dip"
+                android:layout_below="@id/fifth_weather_img"
+                android:layout_marginLeft="20dip"
                 android:singleLine="true"
                 android:text="多云转晴"
                 android:textColor="@android:color/white"
-                android:textSize="20.0sp"/>
+                android:textSize="18.0sp"/>
+            <TextView
+                android:id="@+id/fifth_temperatrue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fifth_climate"
+                android:layout_marginLeft="20dip"
+                android:singleLine="true"
+                android:text="-2℃~7℃"
+                android:textColor="@android:color/white"
+                android:textSize="18.0sp"/>
+
             <!--风力信息-->
             <TextView
                 android:id="@+id/fifth_wind"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/fifth_climate"
-                android:layout_marginLeft="5dip"
-                android:singleLine="true"
+                android:layout_below="@id/fifth_temperatrue"
+                android:layout_marginLeft="20dip"
+                android:singleLine="false"
                 android:text="微风"
                 android:textColor="@android:color/white"
-                android:textSize="20.0sp"/>
+                android:textSize="18.0sp"/>
 
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp">
             <TextView
                 android:id="@+id/sixthDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_marginLeft="20dip"
+                android:layout_marginLeft="10dip"
                 android:singleLine="true"
                 android:text="星期四"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"/>
+                android:textSize="18sp"/>
             <ImageView
                 android:id="@+id/sixth_weather_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_below="@+id/sixthDay"
                 android:src="@drawable/biz_plugin_weather_duoyun"/>
-            <TextView
-                android:id="@+id/sixth_temperatrue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/sixth_weather_img"
-                android:layout_marginLeft="5dip"
-                android:singleLine="true"
-                android:text="-2℃~7℃"
-                android:textColor="@android:color/white"
-                android:textSize="30.0sp"/>
             <TextView
                 android:id="@+id/sixth_climate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/sixth_temperatrue"
-                android:layout_marginLeft="5dip"
+                android:layout_below="@id/sixth_weather_img"
+                android:layout_marginLeft="20dip"
                 android:singleLine="true"
                 android:text="多云转晴"
                 android:textColor="@android:color/white"
-                android:textSize="20.0sp"/>
+                android:textSize="18.0sp"/>
+            <TextView
+                android:id="@+id/sixth_temperatrue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sixth_climate"
+                android:layout_marginLeft="20dip"
+                android:singleLine="true"
+                android:text="-2℃~7℃"
+                android:textColor="@android:color/white"
+                android:textSize="18.0sp"/>
+
             <!--风力信息-->
             <TextView
                 android:id="@+id/sixth_wind"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/sixth_climate"
-                android:layout_marginLeft="5dip"
-                android:singleLine="true"
+                android:layout_below="@id/sixth_temperatrue"
+                android:layout_marginLeft="20dip"
+                android:singleLine="false"
                 android:text="微风"
                 android:textColor="@android:color/white"
-                android:textSize="20.0sp"/>
+                android:textSize="18.0sp"/>
 
         </RelativeLayout>
 

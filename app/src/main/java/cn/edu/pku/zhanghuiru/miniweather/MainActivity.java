@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,11 +61,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private RelativeLayout pagerLayout;
 
+    private ImageView fstImg,secImg,thirdImg,forthImg,fifthImg,sixthImg;
+    private TextView fstDay,secDay,thirdDay,forthDay,fifthDay,sixthDay;
+    private TextView fstTep,secTep,thirdTep,forthTep,fifthTep,sixthTep;
+    private TextView fstWin,secWin,thirdWin,forthWin,fifthWin,sixthWin;
+    private TextView fstCli,secCli,thirdCli,forthCli,fifthCli,sixthCli;
+
     private Handler mhandler=new Handler(){
         public void handleMessage(android.os.Message msg){
             switch (msg.what){
                 case UPDATE_TODAY_WEATHER:
-                    updateTodayWeather((TodayWeather)msg.obj);
+                    updateTodayWeather((List<TodayWeather>)msg.obj);
                     break;
                 default:
                     break;
@@ -76,6 +83,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     //进行序列化所需要的
     private TodayWeather weather=null;
     private long startTime=01,endTime=01;
+
+
 
 
     @Override
@@ -101,12 +110,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         initView();
         initPagerView();
+
+       /* LayoutInflater layoutInflater=LayoutInflater.from(this);
+        View  view1=layoutInflater.inflate(R.layout.three_days_weather,null);
+        View  view2=layoutInflater.inflate(R.layout.six_days_weather,null);
+        fstImg=(ImageView)view1.findViewById(R.id.fst_weather_img);
+        fstDay=(TextView)view1.findViewById(R.id.fstDay);
+        fstTep=(TextView)view1.findViewById(R.id.fst_temperatrue);
+        secImg=(ImageView)view1.findViewById(R.id.sec_weather_img);
+        secDay=(TextView)view1.findViewById(R.id.secDay);
+        secTep=(TextView)view1.findViewById(R.id.sec_temperatrue);
+        thirdImg=(ImageView)view1.findViewById(R.id.third_weather_img);
+        thirdDay=(TextView)view1.findViewById(R.id.thirdDay);
+        thirdTep=(TextView)view1.findViewById(R.id.third_temperatrue);
+        forthImg=(ImageView)view2.findViewById(R.id.fourth_weather_img);
+        forthDay=(TextView)view2.findViewById(R.id.fourthDay);
+        forthTep=(TextView)view2.findViewById(R.id.fourth_temperatrue);
+        fifthImg=(ImageView)view2.findViewById(R.id.fifth_weather_img);
+        fifthDay=(TextView)view2.findViewById(R.id.fifthDay);
+        fifthTep=(TextView)view2.findViewById(R.id.fifth_temperatrue);
+        sixthImg=(ImageView)view2.findViewById(R.id.sixth_weather_img);
+        sixthDay=(TextView)view2.findViewById(R.id.sixthDay);
+        sixthTep=(TextView)view2.findViewById(R.id.sixth_temperatrue);
+*/
     }
 
     //一周天气情况
     public void initPagerView(){
         pagerLayout=(RelativeLayout)findViewById(R.id.sevenDayWeather_content);
-        LayoutInflater layoutInflater=LayoutInflater.from(this);
+        LayoutInflater layoutInflater=LayoutInflater.from(MainActivity.this);
         views=new ArrayList<View>();
         views.add(layoutInflater.inflate(R.layout.three_days_weather,null));
         views.add(layoutInflater.inflate(R.layout.six_days_weather,null));
@@ -147,19 +179,44 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Log.d("myWeather",responseStr);
 
                     todayWeather=parseXML(responseStr);
-                    if(todayWeather!=null){
-                        //对于没有pm信息的城市默认为0
-                        if(todayWeather.getPm25()==null){
-                            todayWeather.setPm25("0");
-                        }
-                        Log.d("todayWeather",todayWeather.toString());
+                    //对于没有pm信息的城市默认为0
+                    if(todayWeather.getPm25()==null){
+                        todayWeather.setPm25("0");
+                    }
+                    List<TodayWeather> list=new ArrayList<TodayWeather>();
+//                    list.add(todayWeather);
+//                    List<TodayWeather> list=parseWeatherXML(responseStr);
+//                    Log.d("list的长度为",list.size()+"...");
+                    list.addAll(parseWeatherXML(responseStr));
+                    list.set(0,todayWeather);
+                    for(TodayWeather t:list){
+                        Log.d("Weatherlist",t.toString()+",,,,,,,,");
+                    }
+//                    if(todayWeather!=null){
+//                        //对于没有pm信息的城市默认为0
+//                        if(todayWeather.getPm25()==null){
+//                            todayWeather.setPm25("0");
+//                        }
+//                        Log.d("todayWeather",todayWeather.toString());
+//
+//                        //将weather信息保存到文件中
+//                        saveObject(serialize(todayWeather));
+//
+//                        Message msg=new Message();
+//                        msg.what=UPDATE_TODAY_WEATHER;
+//                        msg.obj=todayWeather;
+//                        mhandler.sendMessage(msg);
+//
+//                    }
+                    if(list!=null&&list.size()!=0){
 
                         //将weather信息保存到文件中
-                        saveObject(serialize(todayWeather));
+                       saveObject(serialize(todayWeather));
+//                        saveObject(serialize(list));
 
                         Message msg=new Message();
                         msg.what=UPDATE_TODAY_WEATHER;
-                        msg.obj=todayWeather;
+                        msg.obj=list;
                         mhandler.sendMessage(msg);
 
                     }
@@ -223,7 +280,69 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         //从文件中读取天气信息
         try{
+//            List<TodayWeather> weatherList=deSerialize(getObject());
             weather=(TodayWeather)deSerialize(getObject());
+            if(weather==null){
+                cityTv.setText("N/A");
+                timeTv.setText("N/A");
+                humidityTv.setText("N/A");
+                pmQualityTv.setText("N/A");
+                pmDataTv.setText("N/A");
+                weekTv.setText("N/A");
+                temperatureTv.setText("N/A");
+                climateTv.setText("N/A");
+                windTv.setText("N/A");
+                city_name_Tv.setText("N/A");
+                degreeTv.setText("N/A");
+            }else{
+                city_name_Tv.setText(weather.getCity()+"天气");
+                cityTv.setText(weather.getCity());
+                timeTv.setText("今天"+weather.getUpdatetime()+"发布");
+                humidityTv.setText("湿度："+weather.getShidu());
+                pmQualityTv.setText(weather.getQuality());
+                pmDataTv.setText(weather.getPm25());
+                weekTv.setText(weather.getDate());
+                if(weather.getHigh()!=null&&weather.getLow()!=null) {
+                    temperatureTv.setText(weather.getHigh().substring(2) + "~" + weather.getLow().substring(2));
+                }climateTv.setText(weather.getType());
+                windTv.setText(weather.getFengxiang()+weather.getFengli());
+                degreeTv.setText(weather.getWendu()+"℃");
+//                updateTodayWeather(weather);
+//                Log.d("update....deserial","jkeahgk");
+            }
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+   /* void initView(){
+        cityTv=(TextView)findViewById(R.id.city);
+        timeTv=(TextView)findViewById(R.id.time);
+        humidityTv=(TextView)findViewById(R.id.humidity);
+        pmQualityTv=(TextView)findViewById(R.id.pm2_5_quality);
+        pmDataTv=(TextView)findViewById(R.id.pm_data);
+        weekTv=(TextView)findViewById(R.id.week_today);
+        temperatureTv=(TextView)findViewById(R.id.temperatrue);
+        climateTv=(TextView)findViewById(R.id.climate);
+        windTv=(TextView)findViewById(R.id.wind);
+        city_name_Tv=(TextView)findViewById(R.id.title_city_name);
+        weatherImg=(ImageView)findViewById(R.id.weather_img);
+        pmImg=(ImageView)findViewById(R.id.pm2_5_img);
+        //自己添加的温度部分
+        degreeTv=(TextView)findViewById(R.id.degree);
+
+        //从文件中读取天气信息
+        try{
+              List<TodayWeather> weatherList=deSerialize(getObject());
+//            weather=(TodayWeather)deSerialize(getObject());
+              if(weatherList.size()!=0) {
+                  weather = weatherList.get(0);
+              }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -255,7 +374,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
 
-    }
+    }*/
 
     //接收从另一个布局返回的数据
     @Override
@@ -355,6 +474,111 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 */
+    private List<TodayWeather> parseWeatherXML(String xmldata){
+        List<TodayWeather> weatherlist=new ArrayList<TodayWeather>();
+        TodayWeather todayWeather=null;
+        try{
+            XmlPullParserFactory fac=XmlPullParserFactory.newInstance();
+            XmlPullParser xmlPullParser=fac.newPullParser();
+            xmlPullParser.setInput(new StringReader(xmldata));
+            int i=0;
+            int dateCount=0;
+            int highCount=0;
+            int lowCount=0;
+            int typeCount=0;
+            int fengxiangCount=0;
+            int fengliCount=0;
+            int Tcount=0;//用来判断是weather里面的第几个type
+            int XCount=0;//用来判断是weather里面的第几个fengxiang
+            int LCount=0;//用来判断是weather里面的第几个fengli
+
+                int eventType=xmlPullParser.getEventType();
+                todayWeather=null;
+                while(eventType!=XmlPullParser.END_DOCUMENT) {
+                    switch (eventType) {
+                        case XmlPullParser.START_DOCUMENT:
+                            break;
+                        case XmlPullParser.START_TAG:
+                            if(xmlPullParser.getName().equals("weather")){
+                                todayWeather=new TodayWeather();
+                                Tcount=0;
+                                XCount=0;
+                                LCount=0;
+//                                Log.d("weatherxml","jkahfeajue....");
+                            }
+                            if (todayWeather != null) {
+                                Log.d("weatherxml",i+" ");
+                                Log.d("weatherxml--datecount",dateCount+" ");
+                                 if (xmlPullParser.getName().equals("date") && dateCount==i ) {
+                                    eventType = xmlPullParser.next();
+                                    Log.d("myWeather","date: "+xmlPullParser.getText());
+                                    todayWeather.setDate(xmlPullParser.getText());
+                                    dateCount++;
+                                    Log.d("myWeather","datecount: "+dateCount);
+
+                                 } else if (xmlPullParser.getName().equals("high") && highCount == i) {
+                                    eventType = xmlPullParser.next();
+                                    Log.d("myWeather","high: "+xmlPullParser.getText());
+                                    todayWeather.setHigh(xmlPullParser.getText());
+                                    highCount++;
+                                } else if (xmlPullParser.getName().equals("low") && lowCount == i) {
+                                    eventType = xmlPullParser.next();
+                                    Log.d("myWeather","low: "+xmlPullParser.getText());
+                                    todayWeather.setLow(xmlPullParser.getText());
+                                    lowCount++;
+                                }else if (xmlPullParser.getName().equals("type") && typeCount == i&&Tcount==0) {
+                                         eventType = xmlPullParser.next();
+                                         Log.d("myWeather","type: "+xmlPullParser.getText());
+                                         todayWeather.setType(xmlPullParser.getText());
+                                         typeCount++;
+                                         Tcount++;
+                                 }else if (xmlPullParser.getName().equals("fengxiang") && fengxiangCount == i&&XCount==0) {
+                                         eventType = xmlPullParser.next();
+                                         Log.d("myWeather","fengxiang: "+xmlPullParser.getText());
+                                         todayWeather.setFengxiang(xmlPullParser.getText());
+                                         fengxiangCount++;
+                                         XCount++;
+                                 }else if (xmlPullParser.getName().equals("fengli") && fengliCount == i&&LCount==0) {
+                                     eventType = xmlPullParser.next();
+                                     Log.d("myWeather", "fengli: " + xmlPullParser.getText());
+                                     todayWeather.setFengli(xmlPullParser.getText());
+                                     fengliCount++;
+                                     LCount++;
+                                     i++;
+//                                     Log.d("heajea","..."+i);
+                                     weatherlist.add(todayWeather);
+//                                     Log.d("heajea",todayWeather.toString());
+                                 }
+
+                                 /*else if(xmlPullParser.getName().equals("night")&&nightCount==i){
+                                     eventType = xmlPullParser.next();
+                                     i++;
+                                     nightCount++;
+                                         Log.d("heajea","..."+i);
+                                         weatherlist.add(todayWeather);
+                                         Log.d("heajea",todayWeather.toString());
+                                     }*/
+                            }
+
+
+                                break;
+                            //判断当前事件是否为标签元素结束事件
+                        case XmlPullParser.END_TAG:
+                            break;
+                    }
+                    //进入下一个元素并触发相应事件
+                    eventType=xmlPullParser.next();
+                }
+//            }
+        }catch (XmlPullParserException e){
+            e.printStackTrace();
+        }catch(IOException e){
+                e.printStackTrace();
+        }
+        return weatherlist;
+    }
+
+
 
     private TodayWeather parseXML(String xmldata){
         TodayWeather todayWeather=null;
@@ -451,6 +675,193 @@ public class MainActivity extends Activity implements View.OnClickListener {
             e.printStackTrace();
         }
       return todayWeather;
+    }
+
+
+
+    void updateTodayWeather(List<TodayWeather> weatherlist){
+        //更新今日天气
+        TodayWeather todayWeather=weatherlist.get(0);
+        updateTodayWeather(todayWeather);
+
+        TodayWeather weather=null;
+        //更新六日天气
+        int size=weatherlist.size();
+
+        //移除所有的view
+        viewPager.removeAllViews();
+
+        LayoutInflater layoutInflater=LayoutInflater.from(MainActivity.this);
+        View  view1=layoutInflater.inflate(R.layout.three_days_weather,null);
+        View  view2=layoutInflater.inflate(R.layout.six_days_weather,null);
+        fstImg=(ImageView)view1.findViewById(R.id.fst_weather_img);
+        fstDay=(TextView)view1.findViewById(R.id.fstDay);
+        fstTep=(TextView)view1.findViewById(R.id.fst_temperatrue);
+        fstWin=(TextView)view1.findViewById(R.id.fst_wind);
+        fstCli=(TextView)view1.findViewById(R.id.fst_climate);
+        secImg=(ImageView)view1.findViewById(R.id.sec_weather_img);
+        secDay=(TextView)view1.findViewById(R.id.secDay);
+        secTep=(TextView)view1.findViewById(R.id.sec_temperatrue);
+        secWin=(TextView)view1.findViewById(R.id.sec_wind);
+        secCli=(TextView)view1.findViewById(R.id.sec_climate);
+        thirdImg=(ImageView)view1.findViewById(R.id.third_weather_img);
+        thirdDay=(TextView)view1.findViewById(R.id.thirdDay);
+        thirdTep=(TextView)view1.findViewById(R.id.third_temperatrue);
+        thirdWin=(TextView)view1.findViewById(R.id.third_wind);
+        thirdCli=(TextView)view1.findViewById(R.id.third_climate);
+        forthImg=(ImageView)view2.findViewById(R.id.fourth_weather_img);
+        forthDay=(TextView)view2.findViewById(R.id.fourthDay);
+        forthTep=(TextView)view2.findViewById(R.id.fourth_temperatrue);
+        forthWin=(TextView)view2.findViewById(R.id.fourth_wind);
+        forthCli=(TextView)view2.findViewById(R.id.fourth_climate);
+        fifthImg=(ImageView)view2.findViewById(R.id.fifth_weather_img);
+        fifthDay=(TextView)view2.findViewById(R.id.fifthDay);
+        fifthTep=(TextView)view2.findViewById(R.id.fifth_temperatrue);
+        fifthWin=(TextView)view2.findViewById(R.id.fifth_wind);
+        fifthCli=(TextView)view2.findViewById(R.id.fifth_climate);
+        sixthImg=(ImageView)view2.findViewById(R.id.sixth_weather_img);
+        sixthDay=(TextView)view2.findViewById(R.id.sixthDay);
+        sixthTep=(TextView)view2.findViewById(R.id.sixth_temperatrue);
+        sixthWin=(TextView)view2.findViewById(R.id.sixth_wind);
+        sixthCli=(TextView)view2.findViewById(R.id.sixth_climate);
+
+        Log.d("size",size+"...");
+        for(int i=1;i<size;i++){
+            weather=weatherlist.get(i);
+            if(i==1){
+             /*   Log.d("update1","before"+fstDay.getText());
+                Log.d("update1",weather.getHigh());*/
+                setWeatherTypeImg(fstImg,weather.getType());
+                fstDay.setText(weather.getDate());
+                fstTep.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+                fstWin.setText(weather.getFengxiang()+weather.getFengli());
+                fstCli.setText(weather.getType());
+              /*  Log.d("update1","更新成功！");
+                Log.d("update1"," "+fstDay.getText());*/
+            }else if(i==2){
+//                Log.d("update2","before"+secDay.getText());
+                setWeatherTypeImg(secImg,weather.getType());
+                secWin.setText(weather.getFengxiang()+weather.getFengli());
+                secDay.setText(weather.getDate());
+                secTep.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+                secCli.setText(weather.getType());
+//                Log.d("update2","更新成功！");
+            }else if(i==3){
+                thirdDay.setText(weather.getDate());
+                thirdTep.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+                setWeatherTypeImg(thirdImg,weather.getType());
+                thirdWin.setText(weather.getFengxiang()+weather.getFengli());
+                thirdCli.setText(weather.getType());
+
+            }else if(i==4){
+                forthDay.setText(weather.getDate());
+                forthTep.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+                setWeatherTypeImg(forthImg,weather.getType());
+                forthWin.setText(weather.getFengxiang()+weather.getFengli());
+                forthCli.setText(weather.getType());
+            }else if(i==5){
+                fifthDay.setText(weather.getDate());
+                fifthTep.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+                setWeatherTypeImg(fifthImg,weather.getType());
+                fifthWin.setText(weather.getFengxiang()+weather.getFengli());
+                fifthCli.setText(weather.getType());
+            }else if(i==6){
+                sixthDay.setText(weather.getDate());
+                sixthTep.setText(weather.getHigh().substring(2)+"~"+weather.getLow().substring(2));
+                setWeatherTypeImg(sixthImg,weather.getType());
+                sixthWin.setText(weather.getFengxiang()+weather.getFengli());
+                sixthCli.setText(weather.getType());
+
+            }
+        }
+
+
+
+//        pagerLayout=(RelativeLayout)findViewById(R.id.sevenDayWeather_content);
+//        LayoutInflater layoutInflater=LayoutInflater.from(this);
+        views=new ArrayList<View>();
+        if(size>4){
+            views.add(view1);
+            views.add(view2);
+        }else{
+            views.add(view1);
+        }
+
+        viewPagerAdapter=new ViewPagerAdapter(views,this);
+        //*viewPager=(ViewPager)findViewById(R.id.sevenDayWeather);*//*
+        viewPager=new ViewPager(this);
+        viewPager.setAdapter(viewPagerAdapter);
+        //添加到父容器中
+        pagerLayout.addView(viewPager);
+        viewPagerAdapter.notifyDataSetChanged();
+        Log.d("update","cehnggong");
+
+
+    }
+
+    void setWeatherTypeImg(ImageView view,String type){
+        switch (type){
+            case "雾":
+                view.setImageResource(R.drawable.biz_plugin_weather_wu);
+                break;
+            case "晴":
+                view.setImageResource(R.drawable.biz_plugin_weather_qing);
+                break;
+            case "暴雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_baoyu);
+                break;
+            case "暴雪":
+                view.setImageResource(R.drawable.biz_plugin_weather_baoxue);
+                break;
+            case "大暴雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_dabaoyu);
+                break;
+            case "大雪":
+                view.setImageResource(R.drawable.biz_plugin_weather_daxue);
+                break;
+            case "大雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_dayu);
+                break;
+            case "多云":
+                view.setImageResource(R.drawable.biz_plugin_weather_duoyun);
+                break;
+            case "雷阵雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_leizhenyu);
+                break;
+            case "雷阵雨冰雹":
+                view.setImageResource(R.drawable.biz_plugin_weather_leizhenyubingbao);
+                break;
+            case "沙尘暴":
+                view.setImageResource(R.drawable.biz_plugin_weather_shachenbao);
+                break;
+            case "特大暴雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_tedabaoyu);
+                break;
+            case "小雪":
+                view.setImageResource(R.drawable.biz_plugin_weather_xiaoxue);
+                break;
+            case "小雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_xiaoyu);
+                break;
+            case "阴":
+                view.setImageResource(R.drawable.biz_plugin_weather_yin);
+                break;
+            case "雨夹雪":
+                view.setImageResource(R.drawable.biz_plugin_weather_yujiaxue);
+                break;
+            case "阵雪":
+                view.setImageResource(R.drawable.biz_plugin_weather_zhenxue);
+                break;
+            case "阵雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_zhenyu);
+                break;
+            case "中雪":
+                view.setImageResource(R.drawable.biz_plugin_weather_zhongxue);
+                break;
+            case "中雨":
+                view.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
+                break;
+        }
     }
 
     /**
@@ -559,6 +970,39 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Toast.makeText(MainActivity.this, "更新成功", Toast.LENGTH_LONG).show();
     }
 
+/*
+    //将Weatherlist序列化
+    private String serialize(List<TodayWeather> list)throws IOException{
+        startTime=System.currentTimeMillis();
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream=new ObjectOutputStream(byteArrayOutputStream);
+        for(int i=0;i<list.size();i++){
+            TodayWeather todayWeather=list.get(i);
+            objectOutputStream.writeObject(todayWeather);
+        }
+        String str=byteArrayOutputStream.toString("ISO-8859-1");
+        str=java.net.URLEncoder.encode(str,"UTF-8");
+        objectOutputStream.close();
+        byteArrayOutputStream.close();
+        Log.d("Serial TodayWeather","Serial Content:"+str);
+        endTime=System.currentTimeMillis();
+        Log.d("Serial TodayWeather","序列化时间为："+(endTime-startTime));
+        return str;
+    }
+
+    private  List<TodayWeather> deSerialize(String str)throws IOException,ClassNotFoundException{
+        startTime=System.currentTimeMillis();
+        String redStr=java.net.URLDecoder.decode(str,"UTF-8");
+        ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(redStr.getBytes("ISO-8859-1"));
+        ObjectInputStream objectInputStream=new ObjectInputStream(byteArrayInputStream);
+        List<TodayWeather> weatherlist=( List<TodayWeather>) objectInputStream.readObject();
+        objectInputStream.close();
+        byteArrayInputStream.close();
+        endTime=System.currentTimeMillis();
+        Log.d("Deserial TodayWeather","反序列化时间为:"+(endTime-startTime));
+        return weatherlist;
+    }*/
+
     //对天气预报信息进行序列化，使用sharedPreference存储到文件中
     private String serialize(TodayWeather todayWeather)throws IOException{
         startTime=System.currentTimeMillis();
@@ -599,6 +1043,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         SharedPreferences sp=getSharedPreferences("weatherinfo",0);
         return sp.getString("todayWeather",null);
     }
+
 
 }
 
