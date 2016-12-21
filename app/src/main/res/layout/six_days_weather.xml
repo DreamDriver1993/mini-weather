@@ -7,7 +7,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="116dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp">
             <TextView
@@ -31,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/fourth_weather_img"
-                android:layout_marginLeft="5dip"
+                android:layout_marginLeft="20dip"
                 android:singleLine="true"
                 android:text="多云转晴"
                 android:textColor="@android:color/white"
@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/fourth_climate"
-                android:layout_marginLeft="5dip"
+                android:layout_marginLeft="20dip"
                 android:singleLine="true"
                 android:text="-2℃~7℃"
                 android:textColor="@android:color/white"
@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/fourth_temperatrue"
-                android:layout_marginLeft="5dip"
+                android:layout_marginLeft="20dip"
                 android:singleLine="false"
                 android:text="微风"
                 android:textColor="@android:color/white"
@@ -61,7 +61,7 @@
 
         </RelativeLayout>
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="116dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp">
             <TextView
@@ -115,7 +115,7 @@
 
         </RelativeLayout>
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="116dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp">
             <TextView
