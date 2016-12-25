@@ -1047,14 +1047,12 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         for(int a=0;a<ids.length;a++){
             if(position==a){
                 dots[a].setImageResource(R.drawable.page_indicator_focused);
-                Log.d("onPageSelected","why:"+position);
             }else{
                 dots[a].setImageResource(R.drawable.page_indicator_unfocused);
             }
         }
 
     }
-
     @Override
     public void onPageScrollStateChanged(int state) {
 
