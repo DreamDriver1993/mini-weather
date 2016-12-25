@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.provider.ContactsContract;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +47,7 @@ import cn.edu.pku.zhanghuiru.util.ViewPagerAdapter;
 /**
  * Created by Nichole on 2016/9/20.
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener,ViewPager.OnPageChangeListener {
     private static final int UPDATE_TODAY_WEATHER=1;
     private ImageView mUpdateBtn,mCitySelect;
 
@@ -66,6 +67,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView fstTep,secTep,thirdTep,forthTep,fifthTep,sixthTep;
     private TextView fstWin,secWin,thirdWin,forthWin,fifthWin,sixthWin;
     private TextView fstCli,secCli,thirdCli,forthCli,fifthCli,sixthCli;
+
+    //小圆点的实现
+    private ImageView [] dots;
+    private int [] ids={R.id.iv1,R.id.iv2};
 
     private Handler mhandler=new Handler(){
         public void handleMessage(android.os.Message msg){
@@ -110,6 +115,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         initView();
         initPagerView();
+        initDots();
 
        /* LayoutInflater layoutInflater=LayoutInflater.from(this);
         View  view1=layoutInflater.inflate(R.layout.three_days_weather,null);
@@ -135,6 +141,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
 */
     }
 
+    public void initDots(){
+        dots=new ImageView[ids.length];
+        for(int i=0;i<ids.length;i++){
+            dots[i]=(ImageView)findViewById(ids[i]);
+        }
+        Log.d("initDots","heheh");
+    }
+
     //一周天气情况
     public void initPagerView(){
         pagerLayout=(RelativeLayout)findViewById(R.id.sevenDayWeather_content);
@@ -146,6 +160,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         /*viewPager=(ViewPager)findViewById(R.id.sevenDayWeather);*/
         viewPager=new ViewPager(this);
         viewPager.setAdapter(viewPagerAdapter);
+        viewPager.addOnPageChangeListener(this);
         //添加到父容器中
         pagerLayout.addView(viewPager);
     }
@@ -767,6 +782,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         viewPagerAdapter=new ViewPagerAdapter(views,this);
         viewPager=new ViewPager(this);
         viewPager.setAdapter(viewPagerAdapter);
+        viewPager.addOnPageChangeListener(this);
         //添加到父容器中
         pagerLayout.addView(viewPager);
         viewPagerAdapter.notifyDataSetChanged();
@@ -1020,6 +1036,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return sp.getString("todayWeather",null);
     }
 
+    //实现OnPageChangeListener接口需要实现的方法
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        for(int a=0;a<ids.length;a++){
+            if(position==a){
+                dots[a].setImageResource(R.drawable.page_indicator_focused);
+                Log.d("onPageSelected","why:"+position);
+            }else{
+                dots[a].setImageResource(R.drawable.page_indicator_unfocused);
+            }
+        }
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
 }
 
