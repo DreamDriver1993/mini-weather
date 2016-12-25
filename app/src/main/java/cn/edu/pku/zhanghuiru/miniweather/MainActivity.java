@@ -1,14 +1,19 @@
 package cn.edu.pku.zhanghuiru.miniweather;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.provider.ContactsContract;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,24 +42,37 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import cn.edu.pku.zhanghuiru.app.MyApplication;
+import cn.edu.pku.zhanghuiru.bean.City;
 import cn.edu.pku.zhanghuiru.bean.TodayWeather;
 import cn.edu.pku.zhanghuiru.util.NetUtil;
 import cn.edu.pku.zhanghuiru.util.ViewPagerAdapter;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
+
 /**
  * Created by Nichole on 2016/9/20.
  */
-public class MainActivity extends Activity implements View.OnClickListener,ViewPager.OnPageChangeListener {
+public class MainActivity extends CheckPermissionsActivity  implements View.OnClickListener,ViewPager.OnPageChangeListener {
     private static final int UPDATE_TODAY_WEATHER=1;
-    private ImageView mUpdateBtn,mCitySelect;
+    private ImageView mUpdateBtn,mCitySelect,mLocationBtn;
 
     private TextView cityTv,timeTv,humidityTv,pmQualityTv,pmDataTv,weekTv,temperatureTv,
             climateTv,windTv,city_name_Tv,degreeTv;
     private ImageView weatherImg,pmImg;
     private ProgressBar updateprogressbar;
+
+    //进行序列化所需要的
+    private TodayWeather weather=null;
+    private long startTime=01,endTime=01;
 
     private ViewPager viewPager;
     private List<View> views;
@@ -72,6 +90,62 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     private ImageView [] dots;
     private int [] ids={R.id.iv1,R.id.iv2};
 
+    //声明MyApplication
+    private MyApplication myApplication;
+
+    //通过高德定位到的当前城市
+    private City city;
+
+    //高德定位
+    //声明AMapLocationClient类对象
+    public AMapLocationClient mLocationClient = null;
+    //声明定位回调监听器
+    public AMapLocationListener mLocationListener =new AMapLocationListener(){
+        @Override
+        public void onLocationChanged(AMapLocation amapLocation) {
+            if (amapLocation != null) {
+                if (amapLocation.getErrorCode() == 0) {
+                    //可在其中解析amapLocation获取相应内容。
+                   /* amapLocation.getLocationType();//获取当前定位结果来源，如网络定位结果，详见定位类型表
+                    amapLocation.getLatitude();//获取纬度
+                    amapLocation.getLongitude();//获取经度
+                    amapLocation.getAccuracy();//获取精度信息
+                    amapLocation.getAddress();//地址，如果option中设置isNeedAddress为false，则没有此结果，网络定位结果中会有地址信息，GPS定位不返回地址信息。
+                    amapLocation.getCountry();//国家信息
+                    amapLocation.getProvince();//省信息
+                    amapLocation.getCity();//城市信息
+                    amapLocation.getDistrict();//城区信息
+                    amapLocation.getStreet();//街道信息
+                    amapLocation.getStreetNum();//街道门牌号信息
+                    amapLocation.getCityCode();//城市编码
+                    amapLocation.getAdCode();//地区编码
+                    amapLocation.getAoiName();//获取当前定位点的AOI信息
+                    amapLocation.getBuildingId();//获取当前室内定位的建筑物Id
+                    amapLocation.getFloor();//获取当前室内定位的楼层
+//                    amapLocation.getGpsStatus();//获取GPS的当前状态
+                    //获取定位时间
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date date = new Date(amapLocation.getTime());
+                    df.format(date);*/
+                    String name=amapLocation.getDistrict();
+                    name=name.substring(0,name.length()-1);
+                    city=myApplication.getCity(name);
+                    queryWeatherCode(city.getNumber());
+                    Log.d("Location city",city.toString()+" "+city.getNumber());
+                    Log.d("Location...",  amapLocation.getCity()+" "+amapLocation.getDistrict()+" "+amapLocation.getAdCode());
+                }else {
+                    //定位失败时，可通过ErrCode（错误码）信息来确定失败的原因，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError","location Error, ErrCode:"
+                            + amapLocation.getErrorCode() + ", errInfo:"
+                            + amapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
+    //声明AMapLocationClientOption对象
+    public AMapLocationClientOption mLocationOption = null;
+
+
     private Handler mhandler=new Handler(){
         public void handleMessage(android.os.Message msg){
             switch (msg.what){
@@ -85,12 +159,6 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
 
     };
 
-    //进行序列化所需要的
-    private TodayWeather weather=null;
-    private long startTime=01,endTime=01;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,19 +171,40 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         mCitySelect=(ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
 
+        mLocationBtn=(ImageView)findViewById(R.id.title_location);
+        mLocationBtn.setOnClickListener(this);
+
         updateprogressbar=(ProgressBar)findViewById(R.id.title_update_progress);
+
+        myApplication=(MyApplication)getApplication();
+
+        //高德定位
+        //初始化定位
+        mLocationClient = new AMapLocationClient(getApplicationContext());
+        initLocation();
+
+
+        initPagerView();
+        initDots();
+        initView();
 
         if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
             Log.d("myWeather","网络OK");
+            /*if(city!=null){
+                queryWeatherCode(city.getNumber());
+            }else{
+                initView();
+            }*/
             Toast.makeText(MainActivity.this, "网络OK！", Toast.LENGTH_LONG).show();
         }else{
             Log.d("myWeather","网络挂了");
+/*
+            initView();
+*/
             Toast.makeText(MainActivity.this, "网络挂了!", Toast.LENGTH_LONG).show();
         }
 
-        initView();
-        initPagerView();
-        initDots();
+
 
        /* LayoutInflater layoutInflater=LayoutInflater.from(this);
         View  view1=layoutInflater.inflate(R.layout.three_days_weather,null);
@@ -139,6 +228,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         sixthDay=(TextView)view2.findViewById(R.id.sixthDay);
         sixthTep=(TextView)view2.findViewById(R.id.sixth_temperatrue);
 */
+
     }
 
     public void initDots(){
@@ -148,6 +238,36 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         }
         Log.d("initDots","heheh");
     }
+
+    public void initLocation(){
+        //设置定位回调监听
+        mLocationClient.setLocationListener(mLocationListener);
+        //初始化AMapLocationClientOption对象
+        mLocationOption = new AMapLocationClientOption();
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+        //获取一次定位结果：
+        //该方法默认为false。
+        mLocationOption.setOnceLocation(true);
+
+        //获取最近3s内精度最高的一次定位结果：
+        //设置setOnceLocationLatest(boolean b)接口为true，启动定位时SDK会返回最近3s内精度最高的一次定位结果。如果设置其为true，setOnceLocation(boolean b)接口也会被设置为true，反之不会，默认为false。
+        mLocationOption.setOnceLocationLatest(true);
+        //设置是否返回地址信息（默认返回地址信息）
+        mLocationOption.setNeedAddress(true);
+        //设置是否强制刷新WIFI，默认为true，强制刷新。
+        mLocationOption.setWifiActiveScan(false);
+        //设置是否允许模拟位置,默认为false，不允许模拟位置
+        mLocationOption.setMockEnable(false);
+        //单位是毫秒，默认30000毫秒，建议超时时间不要低于8000毫秒。
+        mLocationOption.setHttpTimeOut(20000);
+        //关闭缓存机制
+        mLocationOption.setLocationCacheEnable(false);
+        //给定位客户端对象设置定位参数
+        mLocationClient.setLocationOption(mLocationOption);
+        //启动定位
+        mLocationClient.startLocation();
+    }
+
 
     //一周天气情况
     public void initPagerView(){
@@ -247,6 +367,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         }).start();
     }
 
+
     @Override
     public void onClick(View view){
         if(view.getId()==R.id.title_city_manager){
@@ -256,7 +377,6 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         }
 
         if(view.getId()==R.id.title_update_btn){
-
             SharedPreferences sharedPreferences=getSharedPreferences("config",MODE_PRIVATE);
             String cityCode=sharedPreferences.getString("main_city_code","101010100");
             Log.d("myWeather",cityCode);
@@ -274,6 +394,11 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                 updateprogressbar.setVisibility(View.VISIBLE);
                 Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
             }
+        }
+
+        if(view.getId()==R.id.title_location){
+            Toast.makeText(MainActivity.this, "定位到的当前城市:"+city.getCity(), Toast.LENGTH_LONG).show();
+            queryWeatherCode(city.getNumber());
         }
     }
 
@@ -296,34 +421,42 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         //从文件中读取天气信息
         try{
 //            List<TodayWeather> weatherList=deSerialize(getObject());
-            weather=(TodayWeather)deSerialize(getObject());
-            if(weather==null){
-                cityTv.setText("N/A");
-                timeTv.setText("N/A");
-                humidityTv.setText("N/A");
-                pmQualityTv.setText("N/A");
-                pmDataTv.setText("N/A");
-                weekTv.setText("N/A");
-                temperatureTv.setText("N/A");
-                climateTv.setText("N/A");
-                windTv.setText("N/A");
-                city_name_Tv.setText("N/A");
-                degreeTv.setText("N/A");
-            }else{
-                city_name_Tv.setText(weather.getCity()+"天气");
-                cityTv.setText(weather.getCity());
-                timeTv.setText("今天"+weather.getUpdatetime()+"发布");
-                humidityTv.setText("湿度："+weather.getShidu());
-                pmQualityTv.setText(weather.getQuality());
-                pmDataTv.setText(weather.getPm25());
-                weekTv.setText(weather.getDate());
-                if(weather.getHigh()!=null&&weather.getLow()!=null) {
-                    temperatureTv.setText(weather.getHigh().substring(2) + "~" + weather.getLow().substring(2));
-                }climateTv.setText(weather.getType());
-                windTv.setText(weather.getFengxiang()+weather.getFengli());
-                degreeTv.setText(weather.getWendu()+"℃");
+            if(city==null){
+                weather=(TodayWeather)deSerialize(getObject());
+                if(weather==null){
+                    cityTv.setText("N/A");
+                    timeTv.setText("N/A");
+                    humidityTv.setText("N/A");
+                    pmQualityTv.setText("N/A");
+                    pmDataTv.setText("N/A");
+                    weekTv.setText("N/A");
+                    temperatureTv.setText("N/A");
+                    climateTv.setText("N/A");
+                    windTv.setText("N/A");
+                    city_name_Tv.setText("N/A");
+                    degreeTv.setText("N/A");
+                }else{
+                    city_name_Tv.setText(weather.getCity()+"天气");
+                    cityTv.setText(weather.getCity());
+                    timeTv.setText("今天"+weather.getUpdatetime()+"发布");
+                    humidityTv.setText("湿度："+weather.getShidu());
+                    pmQualityTv.setText(weather.getQuality());
+                    pmDataTv.setText(weather.getPm25());
+                    weekTv.setText(weather.getDate());
+                    if(weather.getHigh()!=null&&weather.getLow()!=null) {
+                        temperatureTv.setText(weather.getHigh().substring(2) + "~" + weather.getLow().substring(2));
+                    }climateTv.setText(weather.getType());
+                    windTv.setText(weather.getFengxiang()+weather.getFengli());
+                    degreeTv.setText(weather.getWendu()+"℃");
+                    setWeatherTypeImg(weatherImg,weather.getType());
+                    int pm25=Integer.parseInt(weather.getPm25());
+                    setPMImg(pmImg,pm25);
 //                updateTodayWeather(weather);
 //                Log.d("update....deserial","jkeahgk");
+                }
+
+            }else{
+                queryWeatherCode(city.getNumber());
             }
 
 
@@ -856,6 +989,30 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         }
     }
 
+    public void setPMImg(ImageView view,int pm25) {
+        if (pm25 <= 50) {
+            view.setImageResource(R.drawable.biz_plugin_weather_0_50);
+        } else {
+            if (pm25 <= 100) {
+                view.setImageResource(R.drawable.biz_plugin_weather_51_100);
+            } else {
+                if (pm25 <= 150) {
+                    view.setImageResource(R.drawable.biz_plugin_weather_101_150);
+                } else {
+                    if (pm25 <= 200) {
+                        view.setImageResource(R.drawable.biz_plugin_weather_151_200);
+                    } else {
+                        if (pm25 <= 300) {
+                            view.setImageResource(R.drawable.biz_plugin_weather_201_300);
+                        } else {
+                            view.setImageResource(R.drawable.biz_plugin_weather_greater_300);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 更新UI控件
      */
@@ -874,7 +1031,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         windTv.setText(todayWeather.getFengxiang()+todayWeather.getFengli());
         degreeTv.setText(todayWeather.getWendu()+"℃");
         int pm25=Integer.parseInt(todayWeather.getPm25());
-        if(pm25<=50){
+        setPMImg(pmImg,pm25);
+       /* if(pm25<=50){
             pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
         }else {
             if(pm25<=100){
@@ -894,10 +1052,11 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
                     }
                 }
             }
-        }
+        }*/
 
         String weather=todayWeather.getType();
-        switch (weather){
+        setWeatherTypeImg(weatherImg,weather);
+       /* switch (weather){
             case "雾":
                 weatherImg.setImageResource(R.drawable.biz_plugin_weather_wu);
                 break;
@@ -958,7 +1117,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
             case "中雨":
                 weatherImg.setImageResource(R.drawable.biz_plugin_weather_zhongyu);
                 break;
-        }
+        }*/
         Toast.makeText(MainActivity.this, "更新成功", Toast.LENGTH_LONG).show();
     }
 
@@ -1057,5 +1216,8 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
     public void onPageScrollStateChanged(int state) {
 
     }
+
+
+
 }
 

@@ -59,6 +59,15 @@ public class MyApplication extends Application{
         return mCityList;
     }
 
+    public City getCity(String cityname){
+        List<City> cityList=getCityList();
+        for(City c:cityList){
+            if(c.getCity().equals(cityname)){
+                return c;
+            }
+        }
+        return null;
+    }
 
     public static MyApplication getInstance(){
         return mApplication;
