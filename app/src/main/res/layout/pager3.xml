@@ -46,7 +46,7 @@
             android:textSize="20dp"
             android:textColor="#fdd211"
             android:background="#ffffff"
-            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
             android:gravity="center_horizontal"
             />
 

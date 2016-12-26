@@ -63,7 +63,7 @@ import com.amap.api.location.AMapLocationListener;
  */
 public class MainActivity extends CheckPermissionsActivity  implements View.OnClickListener,ViewPager.OnPageChangeListener {
     private static final int UPDATE_TODAY_WEATHER=1;
-    private ImageView mUpdateBtn,mCitySelect,mLocationBtn;
+    private ImageView mUpdateBtn,mCitySelect,mLocationBtn,mShareBtn;
 
     private TextView cityTv,timeTv,humidityTv,pmQualityTv,pmDataTv,weekTv,temperatureTv,
             climateTv,windTv,city_name_Tv,degreeTv;
@@ -175,6 +175,9 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
 
         mLocationBtn=(ImageView)findViewById(R.id.title_location);
         mLocationBtn.setOnClickListener(this);
+
+        mShareBtn=(ImageView)findViewById(R.id.title_share);
+        mShareBtn.setOnClickListener(this);
 
         updateprogressbar=(ProgressBar)findViewById(R.id.title_update_progress);
 
@@ -318,7 +321,7 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
                     todayWeather=parseXML(responseStr);
                     //对于没有pm信息的城市默认为0
                     if(todayWeather.getPm25()==null){
-                        todayWeather.setPm25("0");
+                        todayWeather.setPm25("-1");
                     }
                     List<TodayWeather> list=new ArrayList<TodayWeather>();
 //                    list.add(todayWeather);
@@ -393,6 +396,9 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
                     cityCode=city.getNumber();
                 }
                 Log.d("myWeather",cityCode);
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally{
                 if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
                     Log.d("myWeather","网络OK");
                     mUpdateBtn.setVisibility(View.INVISIBLE);
@@ -406,8 +412,6 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
                     updateprogressbar.setVisibility(View.VISIBLE);
                     Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
                 }
-            }catch (Exception e){
-                e.printStackTrace();
             }
         }
 
@@ -423,6 +427,10 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
                 Toast.makeText(MainActivity.this, "定位失败 请诊断网络连接！", Toast.LENGTH_LONG).show();
             }
 
+        }
+
+        if(view.getId()==R.id.title_share){
+            Toast.makeText(MainActivity.this, "分享功能在持续开发中，敬请期待！", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1017,7 +1025,10 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
     }
 
     public void setPMImg(ImageView view,int pm25) {
-        if (pm25 <= 50) {
+        if(pm25<0){
+            view.setImageResource(R.drawable.biz_plugin_weather_0_50);
+
+        }else if(pm25 <= 50) {
             view.setImageResource(R.drawable.biz_plugin_weather_0_50);
         } else {
             if (pm25 <= 100) {
@@ -1048,8 +1059,6 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
         cityTv.setText(todayWeather.getCity());
         timeTv.setText("今天"+todayWeather.getUpdatetime()+"发布");
         humidityTv.setText("湿度："+todayWeather.getShidu());
-        pmQualityTv.setText(todayWeather.getQuality());
-        pmDataTv.setText(todayWeather.getPm25());
         weekTv.setText(todayWeather.getDate());
         if(todayWeather.getHigh()!=null&&todayWeather.getLow()!=null){
             temperatureTv.setText(todayWeather.getHigh().substring(2)+"~"+todayWeather.getLow().substring(2));
@@ -1058,6 +1067,19 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
         windTv.setText(todayWeather.getFengxiang()+todayWeather.getFengli());
         degreeTv.setText(todayWeather.getWendu()+"℃");
         int pm25=Integer.parseInt(todayWeather.getPm25());
+        if(pm25<0){
+            pmQualityTv.setText("未获得该数据");
+            pmQualityTv.setTextSize(15);
+            pmDataTv.setText("未获得该数据");
+            pmDataTv.setTextSize(15);
+
+        }else{
+            pmQualityTv.setText(todayWeather.getQuality());
+            pmQualityTv.setTextSize(20);
+            pmDataTv.setText(todayWeather.getPm25());
+            pmDataTv.setTextSize(30);
+
+        }
         setPMImg(pmImg,pm25);
        /* if(pm25<=50){
             pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
