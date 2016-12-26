@@ -12,8 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="#ff000000"
+        android:layout_marginTop="540dp"
         android:id="@+id/indicator2"
         android:orientation="horizontal"
         android:gravity="center_horizontal">
@@ -27,6 +26,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/dot2"
+            android:padding="5dp"
+            android:src="@drawable/page_indicator_unfocused"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dot3"
             android:padding="5dp"
             android:src="@drawable/page_indicator_unfocused"/>
 

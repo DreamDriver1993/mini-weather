@@ -1,7 +1,6 @@
 package cn.edu.pku.zhanghuiru.miniweather;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -25,7 +24,7 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener{
     private List<View> views;
 
     private ImageView[] dots;
-    private int[] ids={R.id.dot1,R.id.dot2};
+    private int[] ids={R.id.dot1,R.id.dot2,R.id.dot3};
 
     private Button button;
 
@@ -35,7 +34,7 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener{
         setContentView(R.layout.guide);
         initView();
         initDots();
-        button=(Button)views.get(1).findViewById(R.id.exerciseBtn);
+        button=(Button)views.get(2).findViewById(R.id.exerciseBtn);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,6 +50,7 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener{
         views=new ArrayList<View>();
         views.add(layoutInflater.inflate(R.layout.pager1,null));
         views.add(layoutInflater.inflate(R.layout.pager2,null));
+        views.add(layoutInflater.inflate(R.layout.pager3,null));
         viewPagerAdapter=new ViewPagerAdapter(views,this);
         viewPager=(ViewPager)findViewById(R.id.guideviewpager);
         viewPager.setAdapter(viewPagerAdapter);

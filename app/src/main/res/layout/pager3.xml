@@ -3,10 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/smile">
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="城市搜索 实时定位 "
+        android:text="天气雾霾 一步搞定 "
         android:id="@+id/welcome"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
@@ -18,7 +19,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="   更少流量 更精准定位"
+        android:text=" 让您用着舒心 出行安心"
         android:id="@+id/intro"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/welcome"
@@ -28,5 +29,23 @@
         android:textColor="#030303"
         android:typeface="sans"
         />
-    
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal"
+        android:paddingBottom="60dp">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/exerciseBtn"
+            android:text="马上进入"
+            android:textSize="20dp"
+            android:textColor="#fdd211"
+            android:background="#ffffff"/>
+
+
+    </LinearLayout>
+
 </RelativeLayout>

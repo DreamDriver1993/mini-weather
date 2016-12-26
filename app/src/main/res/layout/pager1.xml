@@ -2,6 +2,40 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffff0000">
+    android:background="@drawable/smile">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/relativeLayout2">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="欢迎来到开心天气"
+            android:id="@+id/welcome"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="80dp"
+            android:paddingLeft="20dp"
+            android:textSize="40dp"
+            android:textColor="#fdd211"
+            android:typeface="sans"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="一款简约的天气预报应用"
+            android:id="@+id/intro"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/welcome"
+            android:layout_marginTop="15dp"
+            android:paddingLeft="35dp"
+            android:textSize="26dp"
+            android:textColor="#030303"
+            android:typeface="sans"
+            />
+
+    </RelativeLayout>
+
+
 
 </RelativeLayout>
