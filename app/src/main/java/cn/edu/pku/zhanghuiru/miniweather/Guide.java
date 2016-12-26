@@ -1,7 +1,9 @@
 package cn.edu.pku.zhanghuiru.miniweather;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -28,16 +30,27 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener{
 
     private Button button;
 
+    private static final String SHAREDPREFERENCES_NAME = "first_pref";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.guide);
         initView();
         initDots();
+
         button=(Button)views.get(2).findViewById(R.id.exerciseBtn);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SharedPreferences preferences = getSharedPreferences(
+                        SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                // 存入数据
+                editor.putBoolean("isFirstIn", false);
+                // 提交修改
+                editor.commit();
                 Intent i=new Intent(Guide.this,MainActivity.class);
                 startActivity(i);
                 finish();

@@ -130,7 +130,9 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
                     String name=amapLocation.getDistrict();
                     name=name.substring(0,name.length()-1);
                     city=myApplication.getCity(name);
+/*
                     queryWeatherCode(city.getNumber());
+*/
                     Log.d("Location city",city.toString()+" "+city.getNumber());
                     Log.d("Location...",  amapLocation.getCity()+" "+amapLocation.getDistrict()+" "+amapLocation.getAdCode());
                 }else {
@@ -377,22 +379,35 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
         }
 
         if(view.getId()==R.id.title_update_btn){
-            SharedPreferences sharedPreferences=getSharedPreferences("config",MODE_PRIVATE);
-            String cityCode=sharedPreferences.getString("main_city_code","101010100");
-            Log.d("myWeather",cityCode);
-
-            if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
-                Log.d("myWeather","网络OK");
-                mUpdateBtn.setVisibility(View.INVISIBLE);
-                updateprogressbar.setVisibility(View.VISIBLE);
-                queryWeatherCode(cityCode);
-                mUpdateBtn.setVisibility(View.VISIBLE);
-                updateprogressbar.setVisibility(View.INVISIBLE);
-            }else{
-                Log.d("myWeather","网络挂了");
-                mUpdateBtn.setVisibility(View.INVISIBLE);
-                updateprogressbar.setVisibility(View.VISIBLE);
-                Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+            /*SharedPreferences sharedPreferences=getSharedPreferences("config",MODE_PRIVATE);
+            String cityCode=sharedPreferences.getString("main_city_code","101010100");*/
+            String cityCode="101010100";
+            //首先从存储的文件中读取上次的地址，然后判断网络
+            try{
+                TodayWeather newWeather=(TodayWeather)deSerialize(getObject());
+                String preCityName=newWeather.getCity();
+                City preCity=myApplication.getCity(preCityName);
+                if(preCity!=null){
+                    cityCode=preCity.getNumber();
+                }else{
+                    cityCode=city.getNumber();
+                }
+                Log.d("myWeather",cityCode);
+                if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
+                    Log.d("myWeather","网络OK");
+                    mUpdateBtn.setVisibility(View.INVISIBLE);
+                    updateprogressbar.setVisibility(View.VISIBLE);
+                    queryWeatherCode(cityCode);
+                    mUpdateBtn.setVisibility(View.VISIBLE);
+                    updateprogressbar.setVisibility(View.INVISIBLE);
+                }else{
+                    Log.d("myWeather","网络挂了");
+                    mUpdateBtn.setVisibility(View.INVISIBLE);
+                    updateprogressbar.setVisibility(View.VISIBLE);
+                    Toast.makeText(MainActivity.this, "网络挂了！", Toast.LENGTH_LONG).show();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
 
@@ -430,7 +445,7 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
         //从文件中读取天气信息
         try{
 //            List<TodayWeather> weatherList=deSerialize(getObject());
-            if(city==null){
+            //初始化时，从本地读取上次数据，如果网络ok则进行刷新，否则的话保留之前的旧的内容
                 weather=(TodayWeather)deSerialize(getObject());
                 if(weather==null){
                     cityTv.setText("N/A");
@@ -445,29 +460,32 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
                     city_name_Tv.setText("N/A");
                     degreeTv.setText("N/A");
                 }else{
-                    city_name_Tv.setText(weather.getCity()+"天气");
-                    cityTv.setText(weather.getCity());
-                    timeTv.setText("今天"+weather.getUpdatetime()+"发布");
-                    humidityTv.setText("湿度："+weather.getShidu());
-                    pmQualityTv.setText(weather.getQuality());
-                    pmDataTv.setText(weather.getPm25());
-                    weekTv.setText(weather.getDate());
-                    if(weather.getHigh()!=null&&weather.getLow()!=null) {
-                        temperatureTv.setText(weather.getHigh().substring(2) + "~" + weather.getLow().substring(2));
-                    }climateTv.setText(weather.getType());
-                    windTv.setText(weather.getFengxiang()+weather.getFengli());
-                    degreeTv.setText(weather.getWendu()+"℃");
-                    setWeatherTypeImg(weatherImg,weather.getType());
-                    int pm25=Integer.parseInt(weather.getPm25());
-                    setPMImg(pmImg,pm25);
-//                updateTodayWeather(weather);
-//                Log.d("update....deserial","jkeahgk");
+                    //读取到上次的天气信息，包含城市
+                    String cityName=weather.getCity();
+                    City city2=myApplication.getCity(cityName);
+                    //有网时
+                    if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
+                        queryWeatherCode(city2.getNumber());
+                    }else{//没网时
+                        city_name_Tv.setText(weather.getCity()+"天气");
+                        cityTv.setText(weather.getCity());
+                        timeTv.setText("今天"+weather.getUpdatetime()+"发布");
+                        humidityTv.setText("湿度："+weather.getShidu());
+                        pmQualityTv.setText(weather.getQuality());
+                        pmDataTv.setText(weather.getPm25());
+                        weekTv.setText(weather.getDate());
+                        if(weather.getHigh()!=null&&weather.getLow()!=null) {
+                            temperatureTv.setText(weather.getHigh().substring(2) + "~" + weather.getLow().substring(2));
+                        }climateTv.setText(weather.getType());
+                        windTv.setText(weather.getFengxiang()+weather.getFengli());
+                        degreeTv.setText(weather.getWendu()+"℃");
+                        setWeatherTypeImg(weatherImg,weather.getType());
+                        int pm25=Integer.parseInt(weather.getPm25());
+                        setPMImg(pmImg,pm25);
+//                     updateTodayWeather(weather);
+//                    Log.d("update....deserial","jkeahgk");
+                    }
                 }
-
-            }else{
-                queryWeatherCode(city.getNumber());
-            }
-
 
         }catch (Exception e){
             e.printStackTrace();

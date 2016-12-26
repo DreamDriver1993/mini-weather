@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">开心天气</string>
+    <string name="app_name">Happy Weather</string>
+    <string name="welcome1">    Happy Weather</string>
+    <string name="intro1">One weather forecast app</string>
+    <string name="welcome2">Locate City Search</string>
+    <string name="intro2">Less data  More accurate </string>
+    <string name="welcome3">Accurate Weather</string>
+    <string name="intro3">Comfortable Reassuring</string>
+    <string name="enjoy">GO</string>
 </resources>
