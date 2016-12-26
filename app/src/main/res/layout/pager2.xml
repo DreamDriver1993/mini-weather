@@ -6,27 +6,29 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="城市搜索 实时定位 "
+        android:text="@string/welcome2"
         android:id="@+id/welcome"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
-        android:paddingLeft="20dp"
         android:textSize="40dp"
         android:textColor="#fdd211"
         android:typeface="sans"
+        android:gravity="center_horizontal"
+
         />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="   更少流量 更精准定位"
+        android:text="@string/intro2"
         android:id="@+id/intro"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/welcome"
         android:layout_marginTop="15dp"
-        android:paddingLeft="40dp"
         android:textSize="26dp"
         android:textColor="#030303"
         android:typeface="sans"
+        android:gravity="center_horizontal"
+
         />
-    
+
 </RelativeLayout>

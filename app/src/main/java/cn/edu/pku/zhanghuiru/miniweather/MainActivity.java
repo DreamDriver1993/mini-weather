@@ -397,8 +397,17 @@ public class MainActivity extends CheckPermissionsActivity  implements View.OnCl
         }
 
         if(view.getId()==R.id.title_location){
-            Toast.makeText(MainActivity.this, "定位到的当前城市:"+city.getCity(), Toast.LENGTH_LONG).show();
-            queryWeatherCode(city.getNumber());
+            if(NetUtil.getNetworkState(this)!=NetUtil.NETWORK_NONE){
+               if(city!=null){
+                   Toast.makeText(MainActivity.this, "定位到的当前城市:"+city.getCity(), Toast.LENGTH_LONG).show();
+                   queryWeatherCode(city.getNumber());
+               }else{
+                   Toast.makeText(MainActivity.this, "定位失败！", Toast.LENGTH_LONG).show();
+               }
+            }else{
+                Toast.makeText(MainActivity.this, "定位失败 请诊断网络连接！", Toast.LENGTH_LONG).show();
+            }
+
         }
     }
 

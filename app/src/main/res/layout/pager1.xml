@@ -11,27 +11,27 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="欢迎来到开心天气"
+            android:text="@string/welcome1"
             android:id="@+id/welcome"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="80dp"
-            android:paddingLeft="20dp"
             android:textSize="40dp"
             android:textColor="#fdd211"
             android:typeface="sans"
+            android:gravity="center_horizontal"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="一款简约的天气预报应用"
+            android:text="@string/intro1"
             android:id="@+id/intro"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/welcome"
             android:layout_marginTop="15dp"
-            android:paddingLeft="35dp"
             android:textSize="26dp"
             android:textColor="#030303"
             android:typeface="sans"
+            android:gravity="center_horizontal"
             />
 
     </RelativeLayout>

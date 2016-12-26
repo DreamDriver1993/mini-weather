@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">开心天气</string>
+    <string name="welcome1">欢迎来到开心天气</string>
+    <string name="intro1">一款简约的天气预报应用</string>
+    <string name="welcome2">城市搜索 实时定位</string>
+    <string name="intro2">更少流量 更精准定位</string>
+    <string name="welcome3">天气状况 一键查询</string>
+    <string name="intro3">让您用着舒心 出行安心</string>
+    <string name="enjoy">马上进入</string>
+</resources>
